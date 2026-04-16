@@ -14,11 +14,11 @@ pnpm add -D github:SonicGarden/bugsnag-cli
 環境変数を設定してください。
 
 ```bash
-export BUGSNAG_TOKEN=your_personal_auth_token
+export BUGSNAG_AUTH_TOKEN=your_personal_auth_token
 export BUGSNAG_PROJECT_ID=$(pnpm exec sg-bugsnag projects get-id your_project_name)
 ```
 
-- `BUGSNAG_TOKEN` — Bugsnag の Settings > Personal auth tokens で作成
+- `BUGSNAG_AUTH_TOKEN` — Bugsnag の Settings > Personal auth tokens で作成
 - `BUGSNAG_PROJECT_ID` — `pnpm exec sg-bugsnag projects get-id <name>` でプロジェクト名から取得
 
 ## 使い方

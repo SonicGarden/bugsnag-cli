@@ -16,9 +16,9 @@ import { installSkill } from "./install-skill.js";
 import { writeFileSync } from "node:fs";
 
 function getToken(args: { token?: string }): string {
-  const token = args.token || process.env.BUGSNAG_TOKEN;
+  const token = args.token || process.env.BUGSNAG_AUTH_TOKEN;
   if (!token) {
-    console.error("Error: BUGSNAG_TOKEN environment variable or --token argument is required.");
+    console.error("Error: BUGSNAG_AUTH_TOKEN environment variable or --token argument is required.");
     process.exit(1);
   }
   return token;
