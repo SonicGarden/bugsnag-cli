@@ -103,6 +103,7 @@ pnpm exec sg-bugsnag events fetch ERROR_ID --filter event.since=2026-04-01T00:00
 ```
 
 結果は1ページ分のみ返却され、次ページがある場合は `pagination.next` に URL が含まれます。
+`--per-page` で1ページあたりの件数を指定できます（デフォルト: 30、最大: events list は 30、それ以外は 100）。
 次ページを取得するには `--next` に URL を渡します:
 
 ```bash
