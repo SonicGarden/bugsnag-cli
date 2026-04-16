@@ -1,3 +1,0 @@
-# False positives: "key=type:value" is the filter format syntax, not secrets
-key=type
-key=nocolon
