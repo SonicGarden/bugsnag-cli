@@ -119,11 +119,15 @@ pnpm exec sg-bugsnag events show EVENT_ID
 イベント詳細から以下を確認して原因を推定する:
 
 - `exceptions` — スタックトレースからエラー発生箇所を特定
-- `metadata` — アプリケーション固有のカスタムデータ
+- `metaData` — アプリケーション固有のカスタムデータ
 - `request` — リクエスト URL、メソッド、パラメータ
 - `user` — 影響を受けたユーザー情報
 - `app` — アプリバージョン、リリースステージ
 - `device` — OS、ブラウザなどの環境情報
+- `breadcrumbs` — エラー発生前のユーザー操作やイベントの履歴
+- `context` — エラー発生時の画面やルート情報
+- `severity` — エラーの重要度（error, warning, info）
+- `unhandled` — ハンドルされなかった例外かどうか
 
 スタックトレースのファイルパスをもとに、プロジェクト内の該当コードを読み、根本原因を調査する。
 

@@ -201,7 +201,7 @@ export interface BugsnagEvent {
   received_at: string;
   url: string;
   exceptions: unknown[];
-  metadata: Record<string, unknown>;
+  metaData: Record<string, unknown>;
   request: Record<string, unknown>;
   user: Record<string, unknown>;
   app: Record<string, unknown>;
