@@ -75,6 +75,20 @@ function buildFilterParams(filters: Filters): Record<string, string> {
   return params;
 }
 
+// Organizations
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  [key: string]: unknown;
+}
+
+export async function listUserOrganizations(options: ApiOptions): Promise<Organization[]> {
+  const result = await apiRequest<Organization[]>("/user/organizations", options);
+  return result.data;
+}
+
 // Projects
 
 export interface Project {

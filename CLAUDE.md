@@ -25,7 +25,7 @@ Bugsnag Data Access API からエラー情報を取得する CLI ツール。
 | 環境変数 | 引数 | 説明 |
 |----------|------|------|
 | `BUGSNAG_TOKEN` | `--token` | Personal Auth Token (必須) |
-| `BUGSNAG_ORG_ID` | `--org-id` | Organization ID |
+| `BUGSNAG_ORG_ID` | `--org-id` | Organization ID (省略時は API から自動取得) |
 | `BUGSNAG_PROJECT_ID` | `--project-id` | Project ID |
 
 ### コマンド構造

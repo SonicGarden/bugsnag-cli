@@ -5,9 +5,11 @@ import {
   showError,
   listEvents,
   showEvent,
+  listUserOrganizations,
   BugsnagApiError,
 } from "./api.js";
 import { parseFilters } from "./filters.js";
+import { installSkill } from "./install-skill.js";
 
 function getToken(args: { token?: string }): string {
   const token = args.token || process.env.BUGSNAG_TOKEN;
@@ -18,13 +20,17 @@ function getToken(args: { token?: string }): string {
   return token;
 }
 
-function getOrgId(args: { orgId?: string }): string {
+async function getOrgId(args: { orgId?: string; token?: string }): Promise<string> {
   const orgId = args.orgId || process.env.BUGSNAG_ORG_ID;
-  if (!orgId) {
-    console.error("Error: BUGSNAG_ORG_ID environment variable or --org-id argument is required.");
+  if (orgId) return orgId;
+
+  const token = getToken(args);
+  const orgs = await listUserOrganizations({ token });
+  if (orgs.length === 0) {
+    console.error("Error: No organizations found for this token.");
     process.exit(1);
   }
-  return orgId;
+  return orgs[0].id;
 }
 
 function getProjectId(args: { projectId?: string }): string {
@@ -47,7 +53,7 @@ const projectsList = defineCommand({
   },
   async run({ args }) {
     const token = getToken(args);
-    const orgId = getOrgId(args);
+    const orgId = await getOrgId(args);
     const result = await listProjects(orgId, { token }, { perPage: args.perPage });
     console.log(JSON.stringify(result, null, 2));
   },
@@ -145,6 +151,20 @@ const eventsCommand = defineCommand({
   subCommands: { list: eventsList, show: eventsShow },
 });
 
+const installSkillCommand = defineCommand({
+  meta: { name: "install-skill", description: "Install Claude Code skill to a project" },
+  args: {
+    dir: {
+      type: "positional",
+      description: "Target project directory (default: current directory)",
+      required: false,
+    },
+  },
+  run({ args }) {
+    installSkill(args.dir || process.cwd());
+  },
+});
+
 const main = defineCommand({
   meta: {
     name: "bugsnag-cli",
@@ -155,6 +175,7 @@ const main = defineCommand({
     projects: projectsCommand,
     errors: errorsCommand,
     events: eventsCommand,
+    "install-skill": installSkillCommand,
   },
 });
 

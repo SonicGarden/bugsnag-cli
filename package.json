@@ -7,7 +7,8 @@
     "bugsnag-cli": "./dist/cli.mjs"
   },
   "files": [
-    "dist"
+    "dist",
+    "skill"
   ],
   "scripts": {
     "build": "tsdown",
