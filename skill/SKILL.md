@@ -5,7 +5,7 @@ description: Bugsnag のエラー調査スキル。sg-bugsnag を使って Bugsn
 
 # Bugsnag エラー調査スキル
 
-Bugsnag Data Access API を `sg-bugsnag` コマンド経由で呼び出し、エラー情報を取得・分析する。
+Bugsnag Data Access API を `pnpm exec sg-bugsnag` コマンド経由で呼び出し、エラー情報を取得・分析する。
 
 ## 前提条件
 
@@ -20,7 +20,7 @@ Bugsnag Data Access API を `sg-bugsnag` コマンド経由で呼び出し、エ
 ### プロジェクト一覧
 
 ```bash
-sg-bugsnag projects list [--query NAME]
+pnpm exec sg-bugsnag projects list [--query NAME]
 ```
 
 Organization ID は省略可能（トークンから自動取得される）。`--query` でプロジェクト名の部分一致検索が可能。
@@ -28,7 +28,7 @@ Organization ID は省略可能（トークンから自動取得される）。`
 ### プロジェクト ID 取得
 
 ```bash
-sg-bugsnag projects get-id PROJECT_NAME
+pnpm exec sg-bugsnag projects get-id PROJECT_NAME
 ```
 
 プロジェクト名の完全一致でプロジェクト ID をプレーンテキストで出力する。JSON ではなく ID 文字列のみ。
@@ -36,7 +36,7 @@ sg-bugsnag projects get-id PROJECT_NAME
 ### エラー一覧
 
 ```bash
-sg-bugsnag errors list [--project-id ID] [--filter KEY=TYPE:VALUE ...] [--sort FIELD] [--direction asc|desc] [--per-page N]
+pnpm exec sg-bugsnag errors list [--project-id ID] [--filter KEY=TYPE:VALUE ...] [--sort FIELD] [--direction asc|desc] [--per-page N]
 ```
 
 - `--sort`: `last_seen`, `first_seen`, `events`, `users`
@@ -45,19 +45,19 @@ sg-bugsnag errors list [--project-id ID] [--filter KEY=TYPE:VALUE ...] [--sort F
 ### エラー詳細
 
 ```bash
-sg-bugsnag errors show ERROR_ID [--project-id ID]
+pnpm exec sg-bugsnag errors show ERROR_ID [--project-id ID]
 ```
 
 ### イベント一覧
 
 ```bash
-sg-bugsnag events list [--project-id ID] [--error-id ERROR_ID] [--filter KEY=TYPE:VALUE ...] [--per-page N]
+pnpm exec sg-bugsnag events list [--project-id ID] [--error-id ERROR_ID] [--filter KEY=TYPE:VALUE ...] [--per-page N]
 ```
 
 ### イベント詳細
 
 ```bash
-sg-bugsnag events show EVENT_ID [--project-id ID]
+pnpm exec sg-bugsnag events show EVENT_ID [--project-id ID]
 ```
 
 ## フィルタの書き方
@@ -95,10 +95,10 @@ URL が無い場合は、エラー一覧から該当エラーを探す。
 
 ```bash
 # 最近のエラーを重要度順に取得
-sg-bugsnag errors list --sort last_seen --direction desc --per-page 5
+pnpm exec sg-bugsnag errors list --sort last_seen --direction desc --per-page 5
 
 # エラークラス名で絞り込み
-sg-bugsnag errors list --filter event.class=eq:NoMethodError
+pnpm exec sg-bugsnag errors list --filter event.class=eq:NoMethodError
 ```
 
 ### 2. エラー詳細の確認
@@ -106,7 +106,7 @@ sg-bugsnag errors list --filter event.class=eq:NoMethodError
 エラー ID がわかったら詳細を取得する。
 
 ```bash
-sg-bugsnag errors show ERROR_ID
+pnpm exec sg-bugsnag errors show ERROR_ID
 ```
 
 ### 3. イベント（発生事例）の取得
@@ -115,10 +115,10 @@ sg-bugsnag errors show ERROR_ID
 
 ```bash
 # 特定エラーのイベント一覧
-sg-bugsnag events list --error-id ERROR_ID --per-page 3
+pnpm exec sg-bugsnag events list --error-id ERROR_ID --per-page 3
 
 # イベント詳細（スタックトレース、メタデータ込み）
-sg-bugsnag events show EVENT_ID
+pnpm exec sg-bugsnag events show EVENT_ID
 ```
 
 ### 4. 原因の分析
