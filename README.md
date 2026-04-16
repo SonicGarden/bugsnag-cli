@@ -6,7 +6,7 @@ Bugsnag Data Access API からエラー情報を取得する CLI ツール。人
 
 ```bash
 # 開発中は GitHub リポジトリからインストール
-pnpm add -D github:SonicGarden/sg-bugsnag
+pnpm add -D github:SonicGarden/bugsnag-cli
 ```
 
 ## セットアップ
