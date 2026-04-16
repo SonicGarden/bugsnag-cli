@@ -15,11 +15,11 @@ pnpm add -D github:SonicGarden/sg-bugsnag
 
 ```bash
 export BUGSNAG_TOKEN=your_personal_auth_token
-export BUGSNAG_PROJECT_ID=your_project_id  # 省略可（都度 --project-id で指定も可）
+export BUGSNAG_PROJECT_ID=$(sg-bugsnag projects get-id your_project_name)
 ```
 
 - `BUGSNAG_TOKEN` — Bugsnag の Settings > Personal auth tokens で作成
-- `BUGSNAG_PROJECT_ID` — `sg-bugsnag projects list` で確認
+- `BUGSNAG_PROJECT_ID` — `sg-bugsnag projects get-id <name>` でプロジェクト名から取得
 
 ## 使い方
 
@@ -27,7 +27,8 @@ export BUGSNAG_PROJECT_ID=your_project_id  # 省略可（都度 --project-id で
 
 ```bash
 sg-bugsnag projects list
-sg-bugsnag projects list --query myapp   # プロジェクト名で検索
+sg-bugsnag projects list --query myapp       # プロジェクト名で検索
+sg-bugsnag projects get-id myapp             # プロジェクトIDを取得（プレーンテキスト出力）
 ```
 
 Organization ID はトークンから自動取得されます。

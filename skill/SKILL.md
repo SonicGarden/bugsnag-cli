@@ -25,6 +25,14 @@ sg-bugsnag projects list [--query NAME]
 
 Organization ID は省略可能（トークンから自動取得される）。`--query` でプロジェクト名の部分一致検索が可能。
 
+### プロジェクト ID 取得
+
+```bash
+sg-bugsnag projects get-id PROJECT_NAME
+```
+
+プロジェクト名の完全一致でプロジェクト ID をプレーンテキストで出力する。JSON ではなく ID 文字列のみ。
+
 ### エラー一覧
 
 ```bash

@@ -68,9 +68,29 @@ const projectsList = defineCommand({
   },
 });
 
+const projectsGetId = defineCommand({
+  meta: { name: "get-id", description: "Get project ID by exact name" },
+  args: {
+    token: { type: "string", description: "Bugsnag Personal Auth Token" },
+    orgId: { type: "string", description: "Organization ID" },
+    name: { type: "positional", description: "Project name (exact match)", required: true },
+  },
+  async run({ args }) {
+    const token = getToken(args);
+    const orgId = await getOrgId(args);
+    const all = await listAllProjects(orgId, { token });
+    const project = all.find((p) => p.name === args.name);
+    if (!project) {
+      console.error(`Error: Project "${args.name}" not found.`);
+      process.exit(1);
+    }
+    console.log(project.id);
+  },
+});
+
 const projectsCommand = defineCommand({
   meta: { name: "projects", description: "Manage projects" },
-  subCommands: { list: projectsList },
+  subCommands: { list: projectsList, "get-id": projectsGetId },
 });
 
 const errorsList = defineCommand({
