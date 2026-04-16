@@ -13,6 +13,7 @@
   "scripts": {
     "build": "tsdown",
     "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "lint": "oxlint src/ test/",
     "format": "oxfmt --write src/ test/",
     "prepare": "tsdown"

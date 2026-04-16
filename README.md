@@ -135,6 +135,7 @@ pnpm exec sg-bugsnag install-skill
 pnpm install     # 依存インストール
 pnpm build       # ビルド
 pnpm test        # テスト
+pnpm typecheck   # 型チェック
 pnpm lint        # リント
 pnpm format      # フォーマット
 ```
