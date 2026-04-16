@@ -7,6 +7,7 @@ import {
   listEvents,
   showEvent,
   listUserOrganizations,
+  fetchNextPage,
   BugsnagApiError,
 } from "./api.js";
 import { parseFilters } from "./filters.js";
@@ -99,12 +100,18 @@ const errorsList = defineCommand({
     token: { type: "string", description: "Bugsnag Personal Auth Token" },
     projectId: { type: "string", description: "Project ID" },
     perPage: { type: "string", description: "Number of results per page" },
-    filter: { type: "string", description: "Filter in key=type:value format (repeatable)" },
+    filter: { type: "string", description: "Filter in key=value format (repeatable)" },
     sort: { type: "string", description: "Sort field (e.g. last_seen, first_seen, events, users)" },
     direction: { type: "string", description: "Sort direction (asc or desc)" },
+    next: { type: "string", description: "Next page URL from previous response" },
   },
   async run({ args }) {
     const token = getToken(args);
+    if (args.next) {
+      const result = await fetchNextPage(args.next, { token });
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
     const projectId = getProjectId(args);
     const filterStrings = collectArgs("--filter");
     const filters = filterStrings.length > 0 ? parseFilters(filterStrings) : undefined;
@@ -144,10 +151,16 @@ const eventsList = defineCommand({
     projectId: { type: "string", description: "Project ID" },
     errorId: { type: "string", description: "Error ID (to list events for a specific error)" },
     perPage: { type: "string", description: "Number of results per page" },
-    filter: { type: "string", description: "Filter in key=type:value format (repeatable)" },
+    filter: { type: "string", description: "Filter in key=value format (repeatable)" },
+    next: { type: "string", description: "Next page URL from previous response" },
   },
   async run({ args }) {
     const token = getToken(args);
+    if (args.next) {
+      const result = await fetchNextPage(args.next, { token });
+      console.log(JSON.stringify(result, null, 2));
+      return;
+    }
     const projectId = getProjectId(args);
     const filterStrings = collectArgs("--filter");
     const filters = filterStrings.length > 0 ? parseFilters(filterStrings) : undefined;

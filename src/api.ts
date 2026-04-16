@@ -86,6 +86,13 @@ function buildFilterQuery(filters: Filters): string {
   return parts.join("&");
 }
 
+export function fetchNextPage<T>(
+  nextUrl: string,
+  options: ApiOptions,
+): Promise<PaginatedResponse<T>> {
+  return apiRequest<T>(nextUrl, options);
+}
+
 // Organizations
 
 export interface Organization {

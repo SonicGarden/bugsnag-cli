@@ -92,6 +92,11 @@ pnpm exec sg-bugsnag events show EVENT_ID
 ```
 
 結果は1ページ分のみ返却され、次ページがある場合は `pagination.next` に URL が含まれます。
+次ページを取得するには `--next` に URL を渡します:
+
+```bash
+pnpm exec sg-bugsnag events list --next "https://api.bugsnag.com/..."
+```
 
 ## Claude Code skill
 

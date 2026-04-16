@@ -129,4 +129,12 @@ pnpm exec sg-bugsnag events show EVENT_ID
 
 ### 5. ページネーション
 
-結果が多い場合、レスポンスの `pagination.next` に次ページの URL が含まれる。追加データが必要な場合のみ次ページを取得する。
+結果が多い場合、レスポンスの `pagination.next` に次ページの URL が含まれる。追加データが必要な場合のみ `--next` で次ページを取得する。
+
+```bash
+# 次ページの取得
+pnpm exec sg-bugsnag events list --next "https://api.bugsnag.com/..."
+pnpm exec sg-bugsnag errors list --next "https://api.bugsnag.com/..."
+```
+
+`--next` 指定時は他のオプション（`--project-id`, `--filter` 等）は不要。URL にすべて含まれている。
