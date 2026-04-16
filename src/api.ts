@@ -31,15 +31,26 @@ async function apiRequest<T>(
   path: string,
   options: ApiOptions,
   params?: Record<string, string>,
+  extraQuery?: string,
 ): Promise<PaginatedResponse<T>> {
-  const url = new URL(path.startsWith("http") ? path : `${BASE_URL}${path}`);
-  if (params) {
-    for (const [key, value] of Object.entries(params)) {
-      url.searchParams.set(key, value);
-    }
+  const base = path.startsWith("http") ? path : `${BASE_URL}${path}`;
+  let requestUrl = base;
+  const queryParts: string[] = [];
+  if (params && Object.keys(params).length > 0) {
+    queryParts.push(
+      Object.entries(params)
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join("&"),
+    );
+  }
+  if (extraQuery) {
+    queryParts.push(extraQuery);
+  }
+  if (queryParts.length > 0) {
+    requestUrl += (base.includes("?") ? "&" : "?") + queryParts.join("&");
   }
 
-  const response = await fetch(url.toString(), {
+  const response = await fetch(requestUrl, {
     headers: {
       Authorization: `token ${options.token}`,
       "X-Version": "2",
@@ -64,15 +75,15 @@ export interface FilterValue {
 
 export type Filters = Record<string, FilterValue[]>;
 
-function buildFilterParams(filters: Filters): Record<string, string> {
-  const params: Record<string, string> = {};
+function buildFilterQuery(filters: Filters): string {
+  const parts: string[] = [];
   for (const [key, values] of Object.entries(filters)) {
-    for (let i = 0; i < values.length; i++) {
-      params[`filters[${key}][${i}][type]`] = values[i].type;
-      params[`filters[${key}][${i}][value]`] = values[i].value;
+    for (const v of values) {
+      parts.push(`filters[${key}][][type]=${encodeURIComponent(v.type)}`);
+      parts.push(`filters[${key}][][value]=${encodeURIComponent(v.value)}`);
     }
   }
-  return params;
+  return parts.join("&");
 }
 
 // Organizations
@@ -117,6 +128,24 @@ export function listProjects(
   return apiRequest<Project[]>(`/organizations/${orgId}/projects`, options, queryParams);
 }
 
+export async function listAllProjects(
+  orgId: string,
+  options: ApiOptions,
+): Promise<Project[]> {
+  const all: Project[] = [];
+  let result = await apiRequest<Project[]>(
+    `/organizations/${orgId}/projects`,
+    options,
+    { per_page: "100" },
+  );
+  all.push(...result.data);
+  while (result.pagination.next) {
+    result = await apiRequest<Project[]>(result.pagination.next, options);
+    all.push(...result.data);
+  }
+  return all;
+}
+
 // Errors
 
 export interface BugsnagError {
@@ -142,8 +171,8 @@ export function listErrors(
   if (params?.perPage) queryParams["per_page"] = params.perPage;
   if (params?.sort) queryParams["sort"] = params.sort;
   if (params?.direction) queryParams["direction"] = params.direction;
-  if (params?.filters) Object.assign(queryParams, buildFilterParams(params.filters));
-  return apiRequest<BugsnagError[]>(`/projects/${projectId}/errors`, options, queryParams);
+  const filterQuery = params?.filters ? buildFilterQuery(params.filters) : undefined;
+  return apiRequest<BugsnagError[]>(`/projects/${projectId}/errors`, options, queryParams, filterQuery);
 }
 
 export function showError(
@@ -180,13 +209,13 @@ export function listEvents(
 ): Promise<PaginatedResponse<BugsnagEvent[]>> {
   const queryParams: Record<string, string> = {};
   if (params?.perPage) queryParams["per_page"] = params.perPage;
-  if (params?.filters) Object.assign(queryParams, buildFilterParams(params.filters));
+  const filterQuery = params?.filters ? buildFilterQuery(params.filters) : undefined;
 
   const basePath = params?.errorId
     ? `/projects/${projectId}/errors/${params.errorId}/events`
     : `/projects/${projectId}/events`;
 
-  return apiRequest<BugsnagEvent[]>(basePath, options, queryParams);
+  return apiRequest<BugsnagEvent[]>(basePath, options, queryParams, filterQuery);
 }
 
 export function showEvent(

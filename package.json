@@ -4,7 +4,7 @@
   "description": "CLI tool for fetching error information from Bugsnag Data Access API",
   "type": "module",
   "bin": {
-    "bugsnag-cli": "./dist/cli.mjs"
+    "sg-bugsnag": "./dist/cli.mjs"
   },
   "files": [
     "dist",
@@ -29,6 +29,7 @@
     "citty": "^0.2.2"
   },
   "devDependencies": {
+    "@types/node": "^25.6.0",
     "oxfmt": "^0.44.0",
     "oxlint": "^1.59.0",
     "tsdown": "^0.21.7",

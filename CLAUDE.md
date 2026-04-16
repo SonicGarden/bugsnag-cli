@@ -29,21 +29,22 @@ Bugsnag Data Access API からエラー情報を取得する CLI ツール。
 | `BUGSNAG_PROJECT_ID` | `--project-id` | Project ID |
 
 ### コマンド構造
-リソース + アクション形式。
+リソース + アクション形式。コマンド名は `sg-bugsnag`。
 
 ```
-bugsnag-cli projects list [--org-id]
-bugsnag-cli errors list [--project-id] [--filter key=type:value ...]
-bugsnag-cli errors show <error-id> [--project-id]
-bugsnag-cli events list [--project-id] [--error-id] [--filter key=type:value ...]
-bugsnag-cli events show <event-id> [--project-id]
+sg-bugsnag projects list [--org-id] [--query NAME] [--per-page N]
+sg-bugsnag errors list [--project-id] [--filter key=type:value ...] [--sort FIELD] [--direction asc|desc] [--per-page N]
+sg-bugsnag errors show <error-id> [--project-id]
+sg-bugsnag events list [--project-id] [--error-id] [--filter key=type:value ...] [--per-page N]
+sg-bugsnag events show <event-id> [--project-id]
+sg-bugsnag install-skill [directory]
 ```
 
 ### フィルタ指定
 `--filter key=type:value` の簡略記法。複数指定可。
 
 ```bash
-bugsnag-cli errors list --filter event.class=eq:MyError --filter event.since=eq:2024-01-01
+sg-bugsnag errors list --filter event.class=eq:MyError --filter event.since=eq:2024-01-01
 ```
 
 API に渡されるフィルタ形式:
@@ -53,6 +54,11 @@ API に渡されるフィルタ形式:
   "event.since": [{ "type": "eq", "value": "2024-01-01" }]
 }
 ```
+
+フィルタタイプ:
+- `eq` — 完全一致。ほとんどのフィルタキーで使用
+- `ne` — 不一致
+- `co` — 部分一致。`search` フィルタ専用
 
 ### 出力構造
 正常時は stdout に JSON エンベロープ:
@@ -75,6 +81,9 @@ API に渡されるフィルタ形式:
 - 最終的には npm public パッケージとして公開
 - 開発中は GitHub リポジトリからインストール: `pnpm add github:SonicGarden/sg-bugsnag`
 - `package.json` の `prepare` スクリプトで自動ビルド
+
+### Claude Code skill
+`sg-bugsnag install-skill` コマンドで、プロジェクトに `.claude/skills/bugsnag/SKILL.md` をインストールできる。
 
 ### メタデータ検索について
 Bugsnag のカスタムフィルタ（metadata での検索）は Preferred/Enterprise プランが必要。

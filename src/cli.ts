@@ -1,6 +1,7 @@
 import { defineCommand, runMain } from "citty";
 import {
   listProjects,
+  listAllProjects,
   listErrors,
   showError,
   listEvents,
@@ -50,12 +51,20 @@ const projectsList = defineCommand({
     token: { type: "string", description: "Bugsnag Personal Auth Token" },
     orgId: { type: "string", description: "Organization ID" },
     perPage: { type: "string", description: "Number of results per page" },
+    query: { type: "string", description: "Filter projects by name (case-insensitive substring match)" },
   },
   async run({ args }) {
     const token = getToken(args);
     const orgId = await getOrgId(args);
-    const result = await listProjects(orgId, { token }, { perPage: args.perPage });
-    console.log(JSON.stringify(result, null, 2));
+    if (args.query) {
+      const all = await listAllProjects(orgId, { token });
+      const q = args.query.toLowerCase();
+      const filtered = all.filter((p) => p.name.toLowerCase().includes(q));
+      console.log(JSON.stringify({ data: filtered, pagination: { next: null } }, null, 2));
+    } else {
+      const result = await listProjects(orgId, { token }, { perPage: args.perPage });
+      console.log(JSON.stringify(result, null, 2));
+    }
   },
 });
 
@@ -77,7 +86,7 @@ const errorsList = defineCommand({
   async run({ args }) {
     const token = getToken(args);
     const projectId = getProjectId(args);
-    const filterStrings = toArray(args.filter);
+    const filterStrings = collectArgs("--filter");
     const filters = filterStrings.length > 0 ? parseFilters(filterStrings) : undefined;
     const result = await listErrors(
       projectId,
@@ -120,7 +129,7 @@ const eventsList = defineCommand({
   async run({ args }) {
     const token = getToken(args);
     const projectId = getProjectId(args);
-    const filterStrings = toArray(args.filter);
+    const filterStrings = collectArgs("--filter");
     const filters = filterStrings.length > 0 ? parseFilters(filterStrings) : undefined;
     const result = await listEvents(
       projectId,
@@ -167,7 +176,7 @@ const installSkillCommand = defineCommand({
 
 const main = defineCommand({
   meta: {
-    name: "bugsnag-cli",
+    name: "sg-bugsnag",
     description: "CLI tool for Bugsnag Data Access API",
     version: "0.1.0",
   },
@@ -179,9 +188,18 @@ const main = defineCommand({
   },
 });
 
-function toArray(value: string | string[] | undefined): string[] {
-  if (!value) return [];
-  return Array.isArray(value) ? value : [value];
+function collectArgs(flag: string): string[] {
+  const values: string[] = [];
+  const args = process.argv;
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === flag && i + 1 < args.length) {
+      values.push(args[i + 1]);
+      i++;
+    } else if (args[i].startsWith(`${flag}=`)) {
+      values.push(args[i].slice(flag.length + 1));
+    }
+  }
+  return values;
 }
 
 runMain(main).catch((err: unknown) => {
