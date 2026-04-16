@@ -1,0 +1,37 @@
+{
+  "name": "@sonicgarden/bugsnag-cli",
+  "version": "0.1.0",
+  "description": "CLI tool for fetching error information from Bugsnag Data Access API",
+  "type": "module",
+  "bin": {
+    "bugsnag-cli": "./dist/cli.mjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run",
+    "lint": "oxlint src/ test/",
+    "format": "oxfmt --write src/ test/",
+    "prepare": "tsdown"
+  },
+  "keywords": [
+    "bugsnag",
+    "cli",
+    "error-tracking"
+  ],
+  "author": "SonicGarden",
+  "license": "MIT",
+  "packageManager": "pnpm@10.33.0",
+  "dependencies": {
+    "citty": "^0.2.2"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.44.0",
+    "oxlint": "^1.59.0",
+    "tsdown": "^0.21.7",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
+  }
+}
