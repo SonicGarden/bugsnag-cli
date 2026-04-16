@@ -22,7 +22,8 @@ Bugsnag Data Access API からエラー情報を取得する CLI ツール。
 - Node.js 組み込み fetch (HTTP クライアント)
 
 ### フィルタの内部実装
-CLI の `--filter key=type:value` は API のクエリパラメータ `filters[key][][type]=...&filters[key][][value]=...` に変換される。
+CLI の `--filter key=value` は API のクエリパラメータ `filters[key][][type]=...&filters[key][][value]=...` に変換される。
+フィルタタイプは自動決定: `search` は `co`（部分一致）、それ以外は `eq`（完全一致）。
 `URLSearchParams` はブラケット `[]` をパーセントエンコードしてしまうため、クエリ文字列を手動で構築している。
 citty は同名引数の繰り返しをサポートしないため、`--filter` は `process.argv` から直接収集している。
 

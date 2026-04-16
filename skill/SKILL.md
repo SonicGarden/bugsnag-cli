@@ -36,7 +36,7 @@ pnpm exec sg-bugsnag projects get-id PROJECT_NAME
 ### エラー一覧
 
 ```bash
-pnpm exec sg-bugsnag errors list [--project-id ID] [--filter KEY=TYPE:VALUE ...] [--sort FIELD] [--direction asc|desc] [--per-page N]
+pnpm exec sg-bugsnag errors list [--project-id ID] [--filter KEY=VALUE ...] [--sort FIELD] [--direction asc|desc] [--per-page N]
 ```
 
 - `--sort`: `last_seen`, `first_seen`, `events`, `users`
@@ -51,7 +51,7 @@ pnpm exec sg-bugsnag errors show ERROR_ID [--project-id ID]
 ### イベント一覧
 
 ```bash
-pnpm exec sg-bugsnag events list [--project-id ID] [--error-id ERROR_ID] [--filter KEY=TYPE:VALUE ...] [--per-page N]
+pnpm exec sg-bugsnag events list [--project-id ID] [--error-id ERROR_ID] [--filter KEY=VALUE ...] [--per-page N]
 ```
 
 ### イベント詳細
@@ -62,27 +62,20 @@ pnpm exec sg-bugsnag events show EVENT_ID [--project-id ID]
 
 ## フィルタの書き方
 
-`--filter` オプションで Bugsnag API のフィルタを指定できる。形式は `KEY=TYPE:VALUE`。
+`--filter` オプションで Bugsnag API のフィルタを指定できる。形式は `KEY=VALUE`。`search` は部分一致、それ以外は完全一致。
 
 よく使うフィルタ:
 
 | キー | 説明 | 例 |
 |------|------|-----|
-| `search` | エラークラス名・メッセージのテキスト検索 | `--filter search=co:timeout` |
-| `event.class` | エラークラス名（完全一致） | `--filter event.class=eq:NoMethodError` |
-| `event.since` | 指定日時以降 | `--filter event.since=eq:2024-01-01T00:00:00.000Z` |
-| `event.before` | 指定日時以前 | `--filter event.before=eq:2024-02-01T00:00:00.000Z` |
-| `event.severity` | 重要度 | `--filter event.severity=eq:error` |
-| `app.release_stage` | リリースステージ | `--filter app.release_stage=eq:production` |
-| `user.email` | ユーザーメール | `--filter user.email=eq:user@example.com` |
-| `user.id` | ユーザー ID | `--filter user.id=eq:12345` |
-
-フィルタタイプ:
-- `eq` — 完全一致。ほとんどのフィルタキーで使用
-- `ne` — 不一致
-- `co` — 部分一致。`search` フィルタ専用。他のキー（`event.class` 等）では使えない
-
-エラークラス名やメッセージをあいまい検索したい場合は `event.class=eq:...` ではなく `search=co:...` を使う。
+| `search` | エラークラス名・メッセージのテキスト検索（部分一致） | `--filter search=timeout` |
+| `event.class` | エラークラス名 | `--filter event.class=NoMethodError` |
+| `event.since` | 指定日時以降 | `--filter event.since=2024-01-01T00:00:00.000Z` |
+| `event.before` | 指定日時以前 | `--filter event.before=2024-02-01T00:00:00.000Z` |
+| `event.severity` | 重要度 | `--filter event.severity=error` |
+| `app.release_stage` | リリースステージ | `--filter app.release_stage=production` |
+| `user.email` | ユーザーメール | `--filter user.email=user@example.com` |
+| `user.id` | ユーザー ID | `--filter user.id=12345` |
 
 複数フィルタは `--filter` を繰り返して指定する。
 
@@ -98,7 +91,7 @@ URL が無い場合は、エラー一覧から該当エラーを探す。
 pnpm exec sg-bugsnag errors list --sort last_seen --direction desc --per-page 5
 
 # エラークラス名で絞り込み
-pnpm exec sg-bugsnag errors list --filter event.class=eq:NoMethodError
+pnpm exec sg-bugsnag errors list --filter event.class=NoMethodError
 ```
 
 ### 2. エラー詳細の確認

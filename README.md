@@ -38,9 +38,9 @@ Organization ID はトークンから自動取得されます。
 ```bash
 pnpm exec sg-bugsnag errors list
 pnpm exec sg-bugsnag errors list --sort last_seen --direction desc --per-page 10
-pnpm exec sg-bugsnag errors list --filter event.class=eq:TypeError
-pnpm exec sg-bugsnag errors list --filter search=co:timeout
-pnpm exec sg-bugsnag errors list --filter event.class=eq:TypeError --filter event.since=eq:2024-01-01T00:00:00.000Z
+pnpm exec sg-bugsnag errors list --filter event.class=TypeError
+pnpm exec sg-bugsnag errors list --filter search=timeout
+pnpm exec sg-bugsnag errors list --filter event.class=TypeError --filter event.since=2024-01-01T00:00:00.000Z
 ```
 
 ### エラー詳細
@@ -54,7 +54,7 @@ pnpm exec sg-bugsnag errors show ERROR_ID
 ```bash
 pnpm exec sg-bugsnag events list --error-id ERROR_ID
 pnpm exec sg-bugsnag events list --error-id ERROR_ID --per-page 5
-pnpm exec sg-bugsnag events list --filter event.severity=eq:error
+pnpm exec sg-bugsnag events list --filter event.severity=error
 ```
 
 ### イベント詳細
@@ -65,23 +65,18 @@ pnpm exec sg-bugsnag events show EVENT_ID
 
 ### フィルタ
 
-`--filter KEY=TYPE:VALUE` 形式で指定します。複数指定可。
+`--filter KEY=VALUE` 形式で指定します。複数指定可。`search` は部分一致、それ以外は完全一致。
 
 | キー | 説明 | 例 |
 |------|------|-----|
-| `search` | テキスト検索（部分一致） | `search=co:timeout` |
-| `event.class` | エラークラス名（完全一致） | `event.class=eq:NoMethodError` |
-| `event.since` | 指定日時以降 | `event.since=eq:2024-01-01T00:00:00.000Z` |
-| `event.before` | 指定日時以前 | `event.before=eq:2024-02-01T00:00:00.000Z` |
-| `event.severity` | 重要度 | `event.severity=eq:error` |
-| `app.release_stage` | リリースステージ | `app.release_stage=eq:production` |
-| `user.email` | ユーザーメール | `user.email=eq:user@example.com` |
-| `user.id` | ユーザー ID | `user.id=eq:12345` |
-
-フィルタタイプ:
-- `eq` — 完全一致
-- `ne` — 不一致
-- `co` — 部分一致（`search` 専用）
+| `search` | テキスト検索（部分一致） | `search=timeout` |
+| `event.class` | エラークラス名 | `event.class=NoMethodError` |
+| `event.since` | 指定日時以降 | `event.since=2024-01-01T00:00:00.000Z` |
+| `event.before` | 指定日時以前 | `event.before=2024-02-01T00:00:00.000Z` |
+| `event.severity` | 重要度 | `event.severity=error` |
+| `app.release_stage` | リリースステージ | `app.release_stage=production` |
+| `user.email` | ユーザーメール | `user.email=user@example.com` |
+| `user.id` | ユーザー ID | `user.id=12345` |
 
 ### 出力形式
 

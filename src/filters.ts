@@ -1,11 +1,12 @@
 import type { Filters } from "./api.js";
 
 /**
- * Parse filter strings in the format "key=type:value" into Filters object.
+ * Parse filter strings in the format "key=value" into Filters object.
+ * The filter type is determined automatically: "co" for "search", "eq" for everything else.
  * Multiple filters with the same key are grouped together.
  *
- * Example: ["event.class=eq:MyError", "event.since=eq:2024-01-01"]
- * Result: { "event.class": [{ type: "eq", value: "MyError" }], "event.since": [{ type: "eq", value: "2024-01-01" }] }
+ * Example: ["event.class=MyError", "search=timeout"]
+ * Result: { "event.class": [{ type: "eq", value: "MyError" }], "search": [{ type: "co", value: "timeout" }] }
  */
 export function parseFilters(filterStrings: string[]): Filters {
   const filters: Filters = {};
@@ -13,22 +14,17 @@ export function parseFilters(filterStrings: string[]): Filters {
   for (const str of filterStrings) {
     const eqIndex = str.indexOf("=");
     if (eqIndex === -1) {
-      throw new Error(`Invalid filter format: "${str}". Expected "key=type:value".`);
+      throw new Error(`Invalid filter format: "${str}". Expected "key=value".`);
     }
 
     const key = str.slice(0, eqIndex);
-    const rest = str.slice(eqIndex + 1);
-    const colonIndex = rest.indexOf(":");
-    if (colonIndex === -1) {
-      throw new Error(`Invalid filter format: "${str}". Expected "key=type:value".`);
+    const value = str.slice(eqIndex + 1);
+
+    if (!key) {
+      throw new Error(`Invalid filter format: "${str}". Key must not be empty.`);
     }
 
-    const type = rest.slice(0, colonIndex);
-    const value = rest.slice(colonIndex + 1);
-
-    if (!key || !type) {
-      throw new Error(`Invalid filter format: "${str}". Key and type must not be empty.`);
-    }
+    const type = key === "search" ? "co" : "eq";
 
     if (!filters[key]) {
       filters[key] = [];
