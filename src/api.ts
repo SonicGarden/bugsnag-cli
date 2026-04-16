@@ -50,16 +50,32 @@ async function apiRequest<T>(
     requestUrl += (base.includes("?") ? "&" : "?") + queryParts.join("&");
   }
 
-  const response = await fetch(requestUrl, {
-    headers: {
-      Authorization: `token ${options.token}`,
-      "X-Version": "2",
-    },
-  });
+  const maxRetries = 5;
+  let response: Response | undefined;
 
-  if (!response.ok) {
-    const body = await response.text();
-    throw new BugsnagApiError(response.status, `API error ${response.status}: ${body}`);
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    response = await fetch(requestUrl, {
+      headers: {
+        Authorization: `token ${options.token}`,
+        "X-Version": "2",
+      },
+    });
+
+    if (response.status !== 429) break;
+
+    const retryAfter = response.headers.get("retry-after");
+    const waitSeconds = retryAfter ? Number.parseInt(retryAfter, 10) : 30;
+    const waitMs = (Number.isNaN(waitSeconds) ? 30 : waitSeconds) * 1000;
+    if (attempt < maxRetries) {
+      process.stderr.write(`Rate limited. Retrying in ${waitMs / 1000}s...\n`);
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
+    }
+  }
+
+  if (!response || !response.ok) {
+    const body = response ? await response.text() : "No response";
+    const status = response?.status ?? 0;
+    throw new BugsnagApiError(status, `API error ${status}: ${body}`);
   }
 
   const data = (await response.json()) as T;

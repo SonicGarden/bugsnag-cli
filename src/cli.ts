@@ -9,9 +9,11 @@ import {
   listUserOrganizations,
   fetchNextPage,
   BugsnagApiError,
+  type BugsnagEvent,
 } from "./api.js";
 import { parseFilters } from "./filters.js";
 import { installSkill } from "./install-skill.js";
+import { writeFileSync } from "node:fs";
 
 function getToken(args: { token?: string }): string {
   const token = args.token || process.env.BUGSNAG_TOKEN;
@@ -35,6 +37,16 @@ async function getOrgId(args: { orgId?: string; token?: string }): Promise<strin
   return orgs[0].id;
 }
 
+function outputJson(data: unknown, outputPath?: string): void {
+  const json = JSON.stringify(data, null, 2);
+  if (outputPath) {
+    writeFileSync(outputPath, json + "\n");
+    process.stderr.write(`Written to ${outputPath}\n`);
+  } else {
+    console.log(json);
+  }
+}
+
 function getProjectId(args: { projectId?: string }): string {
   const projectId = args.projectId || process.env.BUGSNAG_PROJECT_ID;
   if (!projectId) {
@@ -53,6 +65,7 @@ const projectsList = defineCommand({
     orgId: { type: "string", description: "Organization ID" },
     perPage: { type: "string", description: "Number of results per page" },
     query: { type: "string", description: "Filter projects by name (case-insensitive substring match)" },
+    output: { type: "string", alias: "o", description: "Output file path (default: stdout)" },
   },
   async run({ args }) {
     const token = getToken(args);
@@ -61,10 +74,10 @@ const projectsList = defineCommand({
       const all = await listAllProjects(orgId, { token });
       const q = args.query.toLowerCase();
       const filtered = all.filter((p) => p.name.toLowerCase().includes(q));
-      console.log(JSON.stringify({ data: filtered, pagination: { next: null } }, null, 2));
+      outputJson({ data: filtered, pagination: { next: null } }, args.output);
     } else {
       const result = await listProjects(orgId, { token }, { perPage: args.perPage });
-      console.log(JSON.stringify(result, null, 2));
+      outputJson(result, args.output);
     }
   },
 });
@@ -104,12 +117,13 @@ const errorsList = defineCommand({
     sort: { type: "string", description: "Sort field (e.g. last_seen, first_seen, events, users)" },
     direction: { type: "string", description: "Sort direction (asc or desc)" },
     next: { type: "string", description: "Next page URL from previous response" },
+    output: { type: "string", alias: "o", description: "Output file path (default: stdout)" },
   },
   async run({ args }) {
     const token = getToken(args);
     if (args.next) {
       const result = await fetchNextPage(args.next, { token });
-      console.log(JSON.stringify(result, null, 2));
+      outputJson(result, args.output);
       return;
     }
     const projectId = getProjectId(args);
@@ -120,7 +134,7 @@ const errorsList = defineCommand({
       { token },
       { perPage: args.perPage, filters, sort: args.sort, direction: args.direction },
     );
-    console.log(JSON.stringify(result, null, 2));
+    outputJson(result, args.output);
   },
 });
 
@@ -130,12 +144,13 @@ const errorsShow = defineCommand({
     token: { type: "string", description: "Bugsnag Personal Auth Token" },
     projectId: { type: "string", description: "Project ID" },
     errorId: { type: "positional", description: "Error ID", required: true },
+    output: { type: "string", alias: "o", description: "Output file path (default: stdout)" },
   },
   async run({ args }) {
     const token = getToken(args);
     const projectId = getProjectId(args);
     const result = await showError(projectId, args.errorId, { token });
-    console.log(JSON.stringify(result, null, 2));
+    outputJson(result, args.output);
   },
 });
 
@@ -153,12 +168,13 @@ const eventsList = defineCommand({
     perPage: { type: "string", description: "Number of results per page" },
     filter: { type: "string", description: "Filter in key=value format (repeatable)" },
     next: { type: "string", description: "Next page URL from previous response" },
+    output: { type: "string", alias: "o", description: "Output file path (default: stdout)" },
   },
   async run({ args }) {
     const token = getToken(args);
     if (args.next) {
       const result = await fetchNextPage(args.next, { token });
-      console.log(JSON.stringify(result, null, 2));
+      outputJson(result, args.output);
       return;
     }
     const projectId = getProjectId(args);
@@ -169,7 +185,7 @@ const eventsList = defineCommand({
       { token },
       { errorId: args.errorId, perPage: args.perPage, filters },
     );
-    console.log(JSON.stringify(result, null, 2));
+    outputJson(result, args.output);
   },
 });
 
@@ -179,18 +195,67 @@ const eventsShow = defineCommand({
     token: { type: "string", description: "Bugsnag Personal Auth Token" },
     projectId: { type: "string", description: "Project ID" },
     eventId: { type: "positional", description: "Event ID", required: true },
+    output: { type: "string", alias: "o", description: "Output file path (default: stdout)" },
   },
   async run({ args }) {
     const token = getToken(args);
     const projectId = getProjectId(args);
     const result = await showEvent(projectId, args.eventId, { token });
-    console.log(JSON.stringify(result, null, 2));
+    outputJson(result, args.output);
+  },
+});
+
+const eventsFetch = defineCommand({
+  meta: { name: "fetch", description: "Fetch detailed event data for an error" },
+  args: {
+    token: { type: "string", description: "Bugsnag Personal Auth Token" },
+    projectId: { type: "string", description: "Project ID" },
+    errorId: { type: "positional", description: "Error ID", required: true },
+    limit: { type: "string", description: "Max number of events to fetch (default: all)" },
+    filter: { type: "string", description: "Filter in key=value format (repeatable)" },
+    output: { type: "string", alias: "o", description: "Output file path (default: stdout)" },
+  },
+  async run({ args }) {
+    const token = getToken(args);
+    const projectId = getProjectId(args);
+    const maxEvents = args.limit ? Number.parseInt(args.limit, 10) : Infinity;
+    const filterStrings = collectArgs("--filter");
+    const filters = filterStrings.length > 0 ? parseFilters(filterStrings) : undefined;
+
+    process.stderr.write(`Fetching event details for error ${args.errorId}...\n`);
+
+    // Collect event IDs via events list with pagination
+    const eventIds: string[] = [];
+    let listResult = await listEvents(projectId, { token }, { errorId: args.errorId, perPage: "30", filters });
+    for (const e of listResult.data) {
+      eventIds.push(e.id);
+      if (eventIds.length >= maxEvents) break;
+    }
+    while (listResult.pagination.next && eventIds.length < maxEvents) {
+      listResult = await fetchNextPage(listResult.pagination.next, { token });
+      for (const e of listResult.data) {
+        eventIds.push(e.id);
+        if (eventIds.length >= maxEvents) break;
+      }
+    }
+
+    process.stderr.write(`Found ${eventIds.length} events. Fetching details...\n`);
+
+    // Fetch each event detail
+    const events: BugsnagEvent[] = [];
+    for (let i = 0; i < eventIds.length; i++) {
+      const result = await showEvent(projectId, eventIds[i], { token });
+      events.push(result.data);
+      process.stderr.write(`  ${i + 1}/${eventIds.length}\n`);
+    }
+
+    outputJson({ data: events, total: events.length }, args.output);
   },
 });
 
 const eventsCommand = defineCommand({
   meta: { name: "events", description: "Manage events" },
-  subCommands: { list: eventsList, show: eventsShow },
+  subCommands: { list: eventsList, show: eventsShow, fetch: eventsFetch },
 });
 
 const installSkillCommand = defineCommand({

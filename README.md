@@ -63,6 +63,17 @@ pnpm exec sg-bugsnag events list --filter event.severity=error
 pnpm exec sg-bugsnag events show EVENT_ID
 ```
 
+### イベント一括取得
+
+特定エラーの全イベント詳細（スタックトレース、metaData 等）を一括取得します。
+ページネーションとレート制限を自動的に処理します。
+
+```bash
+pnpm exec sg-bugsnag events fetch ERROR_ID
+pnpm exec sg-bugsnag events fetch ERROR_ID --limit 10                              # 最大10件
+pnpm exec sg-bugsnag events fetch ERROR_ID --filter event.since=2026-04-01T00:00:00.000Z  # フィルタ付き
+```
+
 ### フィルタ
 
 `--filter KEY=VALUE` 形式で指定します。複数指定可。`search` は部分一致、それ以外は完全一致。
@@ -96,6 +107,15 @@ pnpm exec sg-bugsnag events show EVENT_ID
 
 ```bash
 pnpm exec sg-bugsnag events list --next "https://api.bugsnag.com/..."
+```
+
+### ファイル出力
+
+JSON を出力するすべてのコマンドで `-o` オプションを使ってファイルに保存できます。
+
+```bash
+pnpm exec sg-bugsnag errors list -o errors.json
+pnpm exec sg-bugsnag events fetch ERROR_ID -o events.json
 ```
 
 ## Claude Code skill
